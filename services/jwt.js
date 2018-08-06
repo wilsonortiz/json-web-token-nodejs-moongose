@@ -1,34 +1,40 @@
 'use strict';
 
 const jwt = require('jsonwebtoken')
-const moment = require('moment')
-const config = require('../config')
+const { SECRET_TOKEN } = require('../config')
 
 function createToken(user) {
 
-  let payLoad = {
-    sub: user.email
-  }
+  return new Promise((resolve, reject) => {
 
-  let expiresIn = 1440;
+    let payLoad = {
+      sub: user.email
+    }
 
-  let token = jwt.sign(payLoad, config.SECRET_TOKEN, {expiresIn});
+    let options = {
+      expiresIn: 1440
+    }
 
-  return token;
+    jwt.sign(payLoad, SECRET_TOKEN, options, (err, token) => {
+      if (err)
+        return reject(`${err}`);
+      else
+        resolve(token);
+
+    });
+  });
 }
 
 function decodeToken(token) {
 
-  let decoded = new Promise((resolve, reject) => {
-    jwt.verify(token, config.SECRET_TOKEN, (err, decoded) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, SECRET_TOKEN, (err, decoded) => {
       if (err) {
-        reject(err)
+        reject(`${err}`)
       }
       resolve(decoded)
     });
   });
-
-  return decoded
 }
 
 module.exports = {
